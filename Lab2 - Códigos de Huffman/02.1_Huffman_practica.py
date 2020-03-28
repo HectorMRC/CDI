@@ -3,6 +3,7 @@
 
 """
 import math
+import operator
 
 class Node:
 
@@ -178,11 +179,29 @@ Si len(mensaje)%numero_de_simbolos!=0, se completa el mensaje con el último
 símbolo hasta que la longitud de mensaje es un múltiplo de "numero_de_simbolos"
 
 '''
+
+def getTuple(mensaje, n, start):
+    tupl = ""
+    for index in range(n):
+        position = start + index
+        if position < len(mensaje):
+            tupl += mensaje[position]
+
+    return tupl
+
 def tablaFrecuencias(mensaje,numero_de_simbolos=1):
+    frecuencias = {}
+    l = len(mensaje)
+
+    for index in range(l)[::numero_de_simbolos]:
+        t = getTuple(mensaje, numero_de_simbolos, index)
+        if frecuencias.get(t, None) == None:
+            frecuencias[t] = 1
+        else:
+            frecuencias[t] += 1
     
     return frecuencias
     
-
 """
 Ejemplo
 
@@ -203,18 +222,74 @@ Definir otra función que decodifique los mensajes codificados con la función
 anterior.
 '''
 
-def EncodeHuffman(mensaje_a_codificar,numero_de_simbolos=1):
+def normalize(tabla_frecuencias, size):
+    normalizada = {}
+    for key, value in tabla_frecuencias.items():
+        norma = float(value)/float(size)
+        normalizada[key] = norma
 
-    return mensaje_codificado, m2c, longitud_mensaje
+    return normalizada
+
+def tabla(norma):
+    dpp = []
+    for _, value in norma.items():
+        dpp.append(value)
+
+    return dpp
+
+def order_for_m2c(c):
+  return len(c)
+
+def dictionary(ddp, m2c):
+    translate = {}
+
+    ordenada = sorted(ddp.items(), key=operator.itemgetter(1), reverse=True)
+    m2c.sort(key=order_for_m2c)
+
+    for index in range(len(ordenada)):
+        item_p = ordenada[index]
+        item_c = m2c[index]
+        translate[item_p[0]] = item_c
+
+    return translate
+
+def reverser(translate):
+    reverse = {}
+    for k, v in translate.items():
+        reverse[v] = k
+
+    return reverse 
+
+def EncodeHuffman(mensaje_a_codificar,numero_de_simbolos=1):
+    tdf = tablaFrecuencias(mensaje_a_codificar, numero_de_simbolos)
+    longitud_mensaje = len(mensaje_a_codificar)
+    ddp = normalize(tdf, longitud_mensaje)
     
+    tddp = tabla(ddp)
+    m2c = Huffman(tddp)
+
+    transate = dictionary(ddp, m2c)
     
+    mensaje_codificado = ""
+    for index in range(longitud_mensaje)[::numero_de_simbolos]:
+        t = getTuple(mensaje_a_codificar, numero_de_simbolos, index)
+        code = transate.get(t,None)
+        mensaje_codificado += code
+
+    return mensaje_codificado, transate, longitud_mensaje
+
 def DecodeHuffman(mensaje_codificado,m2c,longitud_mensaje):
+    mensaje_decodificado = ""
+    reverse = reverser(m2c)
+    aux = ""
+    for index in range(longitud_mensaje):
+        aux += mensaje_codificado[index]
+        if aux in reverse:
+            mensaje_decodificado += reverse[aux]
+            aux = ""
 
     return mensaje_decodificado
         
-
-
-
 """
 Ejemplo
 
