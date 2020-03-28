@@ -193,6 +193,8 @@ def tablaFrecuencias(mensaje,numero_de_simbolos=1):
     frecuencias = {}
     l = len(mensaje)
 
+    # iteramos en saltos de numero_de_simbolos caracteres del mensaje dado que la funcion getTutple nos proporciona el substring del
+    # mensaje que empieza en el indice indicado y tiene longitud numero_de_simbolos (o menos, en caso de que sea el final del mensaje)
     for index in range(l)[::numero_de_simbolos]:
         t = getTuple(mensaje, numero_de_simbolos, index)
         if frecuencias.get(t, None) == None:
@@ -224,6 +226,8 @@ anterior.
 
 def normalize(tabla_frecuencias, size):
     normalizada = {}
+
+    # normalizar: escalar los pesos de cada symbolo en el interbalo [0, 1]
     for key, value in tabla_frecuencias.items():
         norma = float(value)/float(size)
         normalizada[key] = norma
@@ -232,20 +236,26 @@ def normalize(tabla_frecuencias, size):
 
 def tabla(norma):
     dpp = []
+    
+    # obtenemos de un diccionario la lista de valores
     for _, value in norma.items():
         dpp.append(value)
 
     return dpp
 
 def order_for_m2c(c):
-  return len(c)
+    return len(c)
 
 def dictionary(ddp, m2c):
     translate = {}
 
+    # ordenamos la distribucion de probabilidades de mas probable a menos, para que vaya acorde con la lista de codigos
+    # proporcionados
     ordenada = sorted(ddp.items(), key=operator.itemgetter(1), reverse=True)
+    # se ordena de mas corto a mas largo, es decir, de mayor prioridad a menos
     m2c.sort(key=order_for_m2c)
 
+    # hacemos un diccionario asociando cada symbolo del mensaje su codigo
     for index in range(len(ordenada)):
         item_p = ordenada[index]
         item_c = m2c[index]
@@ -281,10 +291,15 @@ def EncodeHuffman(mensaje_a_codificar,numero_de_simbolos=1):
 def DecodeHuffman(mensaje_codificado,m2c,longitud_mensaje):
     mensaje_decodificado = ""
     reverse = reverser(m2c)
+
+    # aux encapsula esa convinación de caracteres consecutivos del mensaje_codificado que aun no tiene un symbolo asociado
     aux = ""
     for index in range(longitud_mensaje):
         aux += mensaje_codificado[index]
         if aux in reverse:
+            # en el momento que aux SI que puede ser decodificado, el symbolo único resultante se almacena en el mensaje_decodificado y se limpia aux
+            # para las siguientes iteraciones. Obs.: una vez encontrado un match para aux, se conoce la longitud; es decir, todos los aux alcanzaran la
+            # misma longitud
             mensaje_decodificado += reverse[aux]
             aux = ""
 
