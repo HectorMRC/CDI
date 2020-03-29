@@ -47,39 +47,50 @@ def getTuple(mensaje, n, start):
 
     return tupl
 
-def scale(prob, alfa, interval):
-    scalated = interval
-    p0 = sum(frecuencias)
-    p1 = sum(frecuencias[:alfa])
-    p2 = sum(frecuencias[:alfa+1])
+def normalize(frecuencias):
+    l = len(frecuencias)
+    t = sum(frecuencias)
+
+    norma = []
+    for index in range(l):
+        item = float(frecuencias[index])
+        norma.append(item/t)
+
+    return norma
+
+def set_EOF(alfabeto, frecuencias):
+    new_alf = alfabeto
+    new_alf.append('.')
+    new_fr = frecuencias
+    new_fr.append(1)
     
-    offset = (interval[1]-interval[0])
-    m = p1*offset/p0
-    M = p2*offset/p0
-    scalated[0] = m
-    scalated[1] = M
+    return new_alf, new_fr
+
+def interval(prob, index, F, R):
+    m = sum(prob[0:index])
+    w = prob[index]
+    F = F + (float(m) * R)
+    R = R * w
     
-    return scalated
+    return F, R
 
 def IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos=1):
-    T = sum(frecuencias)
-    pseudo = math.log(4*T,2)
-    K = math.ceil(pseudo)
+    A, F = set_EOF(alfabeto, frecuencias)
+    P = normalize(F)
+    M = mensaje
+    F = 0.
+    R = 1.
 
-    R = math.pow(2,K) 
-    I = [0,R]
-
-    mensaje_codificado = ''
     l = len(mensaje)
-    for index in range(l)[::numero_de_simbolos]:
-        symb = getTuple(mensaje, numero_de_simbolos, index)
-        alfa = alfabeto.index(symb)
-        print(I)
-        I = scale(frecuencias, alfa, I)
-        print(I)
-        print("----------------")
+    mensaje_codificado = ''
+    acumulado = 0
 
-        
+    for index in range(l)[::numero_de_simbolos]:
+        S = getTuple(M, numero_de_simbolos, index)
+        iS = alfabeto.index(S)
+        F, R = interval(P, iS, F, R)
+        G = F + R
+        print(F, G)
 
     return mensaje_codificado
     
@@ -90,7 +101,6 @@ mensaje='ddddccaabbccaaccaabbaaddaacc'
 x = IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos)
 print(x)
 print('01011000111110000000000000000000001000010110001111000000000000000011011000000000000000000000001000010000000000000001000100010000000000010010100000010000')
-
 #%%
             
             
