@@ -38,10 +38,59 @@ IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos)=
 
 """
 
+def getTuple(mensaje, n, start):
+    tupl = ""
+    for index in range(n):
+        position = start + index
+        if position < len(mensaje):
+            tupl += mensaje[position]
+
+    return tupl
+
+def scale(prob, alfa, interval):
+    scalated = interval
+    p0 = sum(frecuencias)
+    p1 = sum(frecuencias[:alfa])
+    p2 = sum(frecuencias[:alfa+1])
+    
+    offset = (interval[1]-interval[0])
+    m = p1*offset/p0
+    M = p2*offset/p0
+    scalated[0] = m
+    scalated[1] = M
+    
+    return scalated
 
 def IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos=1):
-    return
+    T = sum(frecuencias)
+    pseudo = math.log(4*T,2)
+    K = math.ceil(pseudo)
+
+    R = math.pow(2,K) 
+    I = [0,R]
+
+    mensaje_codificado = ''
+    l = len(mensaje)
+    for index in range(l)[::numero_de_simbolos]:
+        symb = getTuple(mensaje, numero_de_simbolos, index)
+        alfa = alfabeto.index(symb)
+        print(I)
+        I = scale(frecuencias, alfa, I)
+        print(I)
+        print("----------------")
+
+        
+
+    return mensaje_codificado
     
+alfabeto=['a','b','c','d']
+frecuencias=[1,10,20,300]
+numero_de_simbolos=1
+mensaje='ddddccaabbccaaccaabbaaddaacc' 
+x = IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos)
+print(x)
+print('01011000111110000000000000000000001000010110001111000000000000000011011000000000000000000000001000010000000000000001000100010000000000010010100000010000')
+
 #%%
             
             
