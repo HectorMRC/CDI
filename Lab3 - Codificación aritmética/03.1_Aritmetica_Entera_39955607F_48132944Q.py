@@ -66,41 +66,58 @@ def set_EOF(alfabeto, frecuencias):
     
     return new_alf, new_fr
 
-def interval(prob, index, F, R):
-    m = sum(prob[0:index])
-    w = prob[index]
-    F = F + (float(m) * R)
-    R = R * w
-    
-    return F, R
+def IntegerInterval(P, iS, limInf, limSup, R):
+    w = limSup - limInf
+
+    c = sum(p[0:iS])
+    d = sum(p[0:iS+1])
+    limSup = limInf + math.ceil(w*d/R)
+    limInf = limInf + math.ceil(w*c/R)
+
+    return limInf, limSup
 
 def IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos=1):
-    A, F = set_EOF(alfabeto, frecuencias)
-    P = normalize(F)
-    M = mensaje
-    F = 0.
-    R = 1.
-
-    l = len(mensaje)
     mensaje_codificado = ''
+    T = sum(frecuencias)
+    K = math.log(4*T,2)
+    K = math.ceil(K) 
+    R = math.pow(2,k)
+
+    limInf = 0
+    limSup = R
     acumulado = 0
 
+    l = len(mensaje)
     for index in range(l)[::numero_de_simbolos]:
         S = getTuple(M, numero_de_simbolos, index)
         iS = alfabeto.index(S)
-        F, R = interval(P, iS, F, R)
-        G = F + R
-        print(F, G)
+        limInf, limSup = IntegerInterval(P, iS, limInf, limSup, R)
 
+        while limSup < 0.5 or limInf > 0.5:
+            if limSup < 0.5:
+                limInf = limInf*2.
+                limSup = limSup*2.
+                
+                mensaje_codificado += '0'
+                mensaje_codificado += '1'*acumulado
+                acumulado = 0
+
+            elif limInf >= 0.5:
+                limInf = (limInf*2.) -1.
+                limSup = (limSup*2.) -1.
+                
+                mensaje_codificado += '1' 
+                mensaje_codificado += '0'*acumulado
+                acumulado = 0
+
+        while limInf >= 0.25 and limSup < 0.75:
+                limInf = (limInf*2.) -0.5
+                limSup = (limSup*2.) -0.5
+                
+                acumulado += 1
+        
     return mensaje_codificado
     
-alfabeto=['a','b','c','d']
-frecuencias=[1,10,20,300]
-numero_de_simbolos=1
-mensaje='ddddccaabbccaaccaabbaaddaacc' 
-x = IntegerArithmeticCode(mensaje,alfabeto,frecuencias,numero_de_simbolos)
-print(x)
-print('01011000111110000000000000000000001000010110001111000000000000000011011000000000000000000000001000010000000000000001000100010000000000010010100000010000')
 #%%
             
             
@@ -131,12 +148,91 @@ Definir otra función que decodifique los mensajes codificados con la función
 anterior.
 '''
 
+def interval(prob, index, limInf, limSup):
+    infI = prob[0:index]
+    supI = prob[0:index+1]
+
+    inf = sum(infI)
+    sup = sum(supI)
+
+    #limInf = limInf + (float(m) * longitud)
+
+    longitud = limSup - limInf
+    limSup = limInf + longitud*float(sup)
+    limInf = limInf + longitud*float(inf)
+    
+    return limInf, limSup
+
+def getTablaFrequencias(mensaje, numero_de_simbolos=1):
+    alfabeto = []
+    frecuencias = []
+    T = len(mensaje)
+    
+    total = 0
+    for index in range(T)[::numero_de_simbolos]:
+        total += 1
+        signo = getTuple(mensaje, numero_de_simbolos, index)
+
+        if signo in alfabeto:
+            i = alfabeto.index(signo)
+            frecuencias[i] += 1
+        else:
+            alfabeto.append(signo)
+            frecuencias.append(1)
+
+    return alfabeto, frecuencias
 
 def EncodeArithmetic(mensaje_a_codificar,numero_de_simbolos=1):
+    alfabeto, frecuencias = getTablaFrequencias(mensaje, numero_de_simbolos)
+
+    P = normalize(frecuencias)
+    M = mensaje
+    limInf = 0.
+    limSup = 1.
+    #longitud = 1.
+
+    l = len(mensaje)
+    mensaje_codificado = ''
+    acumulado = 0
+
+    for index in range(l)[::numero_de_simbolos]:
+        S = getTuple(M, numero_de_simbolos, index)
+        print(S)
+        iS = alfabeto.index(S)
+        limInf, limSup = interval(P, iS, limInf, limSup)
+        
+        while limSup < 0.5 or limInf > 0.5:
+            if limSup < 0.5:
+                limInf = limInf*2.
+                limSup = limSup*2.
+                
+                mensaje_codificado += '0'
+                mensaje_codificado += '1'*acumulado
+                acumulado = 0
+
+            elif limInf >= 0.5:
+                limInf = (limInf*2.) -1.
+                limSup = (limSup*2.) -1.
+                
+                mensaje_codificado += '1' 
+                mensaje_codificado += '0'*acumulado
+                acumulado = 0
+
+        while limInf >= 0.25 and limSup < 0.75:
+                limInf = (limInf*2.) -0.5
+                limSup = (limSup*2.) -0.5
+                
+                acumulado += 1
 
     return mensaje_codificado,alfabeto,frecuencias
     
 def DecodeArithmetic(mensaje_codificado,tamanyo_mensaje,alfabeto,frecuencias):
+    mensaje_decodificado = ''
+    P = normalize(frecuencias)
+
+    limInf = 0.
+    limSup = 1.
+    limiteBinario = 0.5
 
     return mensaje_decodificado
         
@@ -146,17 +242,20 @@ def DecodeArithmetic(mensaje_codificado,tamanyo_mensaje,alfabeto,frecuencias):
 Ejemplo (!El mismo mensaje se puede codificar con varios códigos¡)
 
 '''
-
 lista_C=['010001110110000000001000000111111000000100010000000000001100000010001111001100001000000',
          '01000111011000000000100000011111100000010001000000000000110000001000111100110000100000000']
 alfabeto=['a','b','c','d']
 frecuencias=[1,10,20,300]
 mensaje='dddcabccacabadac'
+x, alf, freq = EncodeArithmetic(mensaje, 1)
+print(x)
 tamanyo_mensaje=len(mensaje)  
 
 for C in lista_C:
     mensaje_recuperado=DecodeArithmetic(C,tamanyo_mensaje,alfabeto,frecuencias)
     print(mensaje==mensaje_recuperado)
+
+exit()
 
 
 
