@@ -25,11 +25,14 @@ def locate(mensaje, buffer, ventana):
     index_b = buffer[0]
     caso_b = mensaje[index_b] # tenemos el caracter marcado por el buffer
    
-    index_v = ventana[0]
+    index_v = ventana[1]-1
     while index_v >= ventana[0] and index_v < ventana[1]:
         # queremos encontrar aquel patron de longitud máxima en la que coinciden el buffer, empezando por buffer[0], y
         # la ventana, empezando por cualquiera de los caracteres que hay en ella.
-        caso_v = mensaje[index_v:index_v+longitud+1]
+        caso_v = mensaje[index_v]
+        if index_v + longitud < ventana[1]:
+            caso_v = mensaje[index_v:index_v+longitud+1]
+
         if caso_v == caso_b:
             # si ambos caracteres coinciden: hemos encontrado un patron de longitud +1
             posicion = ventana[1]-index_v
@@ -43,7 +46,7 @@ def locate(mensaje, buffer, ventana):
                 break
         
         else:
-            index_v += 1
+            index_v -= 1
 
     return longitud, posicion
 
@@ -63,9 +66,9 @@ def LZ77Code(mensaje,S=12,L=6):
 
     while buffer[0] < len(mensaje):
         longitud, posicion = locate(mensaje, buffer, ventana)
-        codigo = ['EOF', longitud, posicion]
-        if buffer[0]+longitud < len(mensaje):
-            codigo[0] = mensaje[buffer[0]+longitud]
+        codigo = ['EOF', longitud+1, posicion]
+        if buffer[0]+longitud+1 < len(mensaje):
+            codigo = [mensaje[buffer[0]+longitud], longitud, posicion]
 
         mensaje_codificado.append(codigo)
         buffer[0] += longitud+1
