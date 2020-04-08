@@ -83,12 +83,6 @@ def LZ77Code(mensaje,S=12,L=6):
             ventana[1] += longitud+1
 
     return mensaje_codificado
-    
-mensaje='cabracadabrarrarr'
-c = LZ77Code(mensaje,12,6)
-print("GOT: ", c)
-print("WANT: ", [['c', 0, 0], ['a', 0, 0],  ['b', 0, 0], ['r', 0, 0],  ['c', 1, 3],  ['d', 1, 2], ['r', 4, 7],  ['EOF', 4, 3]])
-exit()
 
 """
 Dado un mensaje codificado con el algoritmo LZ77 hallar el mensaje 
@@ -101,11 +95,20 @@ LZ77Decode(code)='patadecabra'
 
 """   
 def LZ77Decode(codigo):
+    mensaje_recuperado = ''
+    historial = ''
+
+    for tupla in codigo:
+        print(tupla)
+
     return
     
-    
-    
 
+code=[['p', 0, 0], ['a', 0, 0],  ['t', 0, 0],  ['d', 1, 2],  ['e', 0, 0], ['c', 0, 0], ['b', 1, 4],  ['r', 0, 0], ['EOF', 1, 3]]
+msg = LZ77Decode(code)
+print(msg)
+
+exit()
 
 """
 Jugar con los valores de S y L (bits_o y bits_l)
