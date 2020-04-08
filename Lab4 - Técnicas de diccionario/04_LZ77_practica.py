@@ -124,13 +124,6 @@ def LZ77Decode(codigo):
 
 
     return mensaje_recuperado
-    
-
-code=[['p', 0, 0], ['a', 0, 0],  ['t', 0, 0],  ['d', 1, 2],  ['e', 0, 0], ['c', 0, 0], ['b', 1, 4],  ['r', 0, 0], ['EOF', 1, 3]]
-msg = LZ77Decode(code)
-print(msg)
-
-exit()
 
 """
 Jugar con los valores de S y L (bits_o y bits_l)
