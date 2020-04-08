@@ -25,7 +25,7 @@ def locate(mensaje, buffer, ventana):
     index_b = buffer[0]
     caso_b = mensaje[index_b] # tenemos el caracter marcado por el buffer
    
-    index_v = ventana[1]-1
+    index_v = ventana[1]-1 # dado que queremos dar saltos lo mas cortos posible, recorreremos la ventana en reverso: último que entra primero que se lee
     while index_v >= ventana[0] and index_v < ventana[1]:
         # queremos encontrar aquel patron de longitud máxima en la que coinciden el buffer, empezando por buffer[0], y
         # la ventana, empezando por cualquiera de los caracteres que hay en ella.
@@ -93,15 +93,37 @@ code=[['p', 0, 0], ['a', 0, 0],  ['t', 0, 0],  ['d', 1, 2],  ['e', 0, 0],
  
 LZ77Decode(code)='patadecabra'
 
-"""   
+"""
+
+def locator(historial, longitud, posicion):
+    substr = ''
+    index = len(historial)-posicion
+
+    while index < len(historial):
+        substr += historial[index]
+        if len(substr) < longitud:
+            index += 1
+        else:
+            break
+
+    return substr
+
 def LZ77Decode(codigo):
     mensaje_recuperado = ''
     historial = ''
 
     for tupla in codigo:
-        print(tupla)
+        submsg = locator(historial, tupla[1], tupla[2])
+        
+        historial += submsg+tupla[0]
+        mensaje_recuperado += submsg
+        if tupla[0] != 'EOF':
+            mensaje_recuperado += tupla[0]
+        else:
+            break
 
-    return
+
+    return mensaje_recuperado
     
 
 code=[['p', 0, 0], ['a', 0, 0],  ['t', 0, 0],  ['d', 1, 2],  ['e', 0, 0], ['c', 0, 0], ['b', 1, 4],  ['r', 0, 0], ['EOF', 1, 3]]
