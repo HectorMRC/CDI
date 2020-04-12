@@ -15,8 +15,50 @@ LZ78Code(mensaje)=[[0, 'w'], [0, 'a'], [0, 'b'], [3, 'a'],
   
 """
 
-def LZ78Code(mensaje):
+def find_codeword(table, mensaje, start):
+        index = 0
+        latest = ''
 
+        shadow = ''
+        while start < len(mensaje):
+                # start nos marca a partir de que caracter queremos iterar hasta encontrar uno que difiera de los registrados
+                # en la tabla
+                shadow += mensaje[start] # shadow es la nueva palabra completa
+                latest =  mensaje[start] # latest es el caracter que estamos añadiendo a la palabra: shadow[len(shadow)-1]
+
+                if shadow not in table:
+                        # si la nueva es efectivamente una palabra nueva, hemos acabado
+                        break
+                else:
+                        # de lo contrario, actualizamos el indice con la posición de la palabra en la tabla con la cual hemos
+                        # hecho match y seguimos iterando
+                        index = table.index(shadow)+1 # +1, pues 0 significa que la palabra no tiene ninguna referencia: nueva y sin patrones
+
+                start += 1
+                if start >= len(mensaje):
+                        # en caso de que start+1 se salga del mensaje, estamos ante un Fin del fichero (EOF)
+                        latest = 'EOF'
+
+        return index, latest, shadow
+
+def LZ78Code(mensaje):
+        mensaje_codificado = []
+        codeword_table = [] # esta table contendrá la relación entre el indice (empezando por 1) y la nueva palabra allada
+
+        index = 0
+        while index < len(mensaje):
+                # obtenemos el indice de aquella palabra del mensaje que empieza en mensaje[index]; el caracter a partir del
+                # cual ya no hay match en la tabla (solo es uno) y la nueva palabra completa (palabra anteriormente registrada
+                # en la tabla + caracter que la hace diferir de las registradas)
+                i, l, s = find_codeword(codeword_table, mensaje, index)
+                # como la nueva palabra SEGURO que no está en nuestra tabla, la añadimos
+                codeword_table.append(s)
+                
+                tupla = [i, l]
+                mensaje_codificado.append(tupla)
+                index += len(s)
+
+        return mensaje_codificado
     
 """
 Dado un mensaje codificado con el algoritmo LZ78 hallar el mensaje 
@@ -30,9 +72,39 @@ code=[[0, 'm'], [0, 'i'], [0, 's'], [3, 'i'], [3, 's'],
 LZ78Decode(code)='mississippi mississippi river'
 """    
 
-def LZ78Decode(codigo):
+def locate(table, index):
+        subject = ''
+        if index > len(table):
+                return None
+        else:
+                # tal y como hemos implementado el encoder, 0 no es un indice posible, siempre se empieza por 1 como mímnimo
+                # hay que restarle 1 para asegurar-se que se coje el elemento correcto de la lista
+                return table[index-1]
 
-    
+def LZ78Decode(codigo):
+        mensaje_decodificado = ''
+        codeword_table = []
+
+        for index in range(len(codigo)):
+                tupla = codigo[index]
+                word = ''
+
+                if tupla[0] == 0:
+                        word = tupla[1]
+                else:
+                        word = locate(codeword_table, tupla[0])+tupla[1]
+
+                if tupla[1] == 'EOF':
+                        # en el momento en que el siguiente symbolo a añadir sea el EOF, lo cortamos de la word a añadir
+                        # en nuestro mensaje decodificado (que seguro que está al final), y finalizamos la decodificacion
+                        pos = word.index('EOF')
+                        mensaje_decodificado += word[0:pos]
+                        break
+
+                mensaje_decodificado += word
+                codeword_table.append(word)
+
+        return mensaje_decodificado
     
 mensaje='wabba wabba wabba wabba woo woo woo' 
 mensaje_codificado=LZ78Code(mensaje)
