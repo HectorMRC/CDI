@@ -33,6 +33,35 @@ def  kraft2(L, q=2):
 
     return len(extended) - len(L)
 
+def  kraft2_b(L, q=2):
+	lmax=max(L)
+	alfa = 0.
+	for qli in L:
+		alfa += 1./(q**qli)
+		if alfa >= 1. :
+			return 0
+	return (1. - alfa) / (1./ (q**lmax))
+
+def  kraft2_c(L, q=2):
+    mx=max(L)
+    code=True
+    nump=0
+    while(code):
+        nump+=1
+        L.append(mx)
+        code=kraft1(L,q=2)
+    nump-=1
+    return nump
+
+lon = [2,3,4,4,5,5,7,7,7,8]
+ret = kraft2(lon)
+print(ret)
+ret = kraft2_b(lon)
+print(ret)
+ret = kraft2_c(lon)
+print(ret)
+exit()
+
 '''
 Dada la lista L de longitudes de las palabras de un  
 código q-ario, calcular el máximo número de palabras 
@@ -110,12 +139,6 @@ def Code(L,q=2):
         code.append(palabra)
 
     return code
-
-print("---------------------------------")
-l=[4, 5, 1, 3, 5, 5, 5] 
-x = Code(l)
-print(x)
-print("---------------------------------")
 
 #%%
 

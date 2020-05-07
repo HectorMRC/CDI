@@ -167,8 +167,6 @@ M = Average(C)
 
 
 
-
-
 #%%----------------------------------------------------
 
 '''
@@ -304,7 +302,11 @@ def DecodeHuffman(mensaje_codificado,m2c,longitud_mensaje):
             aux = ""
 
     return mensaje_decodificado
-        
+
+ddp = [0.0187, 0.0677, 0.082, 0.127, 0.1439, 0.1752, 0.1794, 0.2061]
+c = Huffman(ddp)
+print(c)
+exit()  
 """
 Ejemplo
 
