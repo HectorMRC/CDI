@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import imageio
 import PIL
 import pickle
+import math
 
 
 
@@ -44,10 +45,22 @@ Definir una funcion que dada una imagen
 cuantize uniformemente los valores en cada bloque 
 """
 
+def GetArrayBloques(imagen, n_bloque):
+    (n,m) = imagen.shape
+    total_bks = math.ceil(m*n/n_bloque)
+    bloques = [ [ [ 0 for i in range(n_bloque) ] for j in range(n_bloque) ] for t in range(total_bks)]
+
+    for fila in range(n): # por cada fila de la imagen
+        (_, fb) = math.modf(fila/n_bloque) # en que bloque (respecto las filas) estamos
+        for columna in range(m): # por cada columna de la imagen
+            (_, cb) = math.modf(columna/n_bloque) # en que bloque (respecto las columnas) estamos
+
+            
+    return bloques
+
 def Cuantizacion_uniforme_adaptativa(imagen, bits=3, n_bloque=8):
     
     return imagenCodigo
-
 
 """
 imagen: imagen a cuantizar
