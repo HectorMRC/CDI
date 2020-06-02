@@ -49,6 +49,7 @@ Podéis usar las funciones implementadas, en particular vq y kmeans
 #%%
 
 imagen=imageio.imread('../standard_test_images/jetplane.png')
+# imagen=imageio.imread('../standard_test_images/lena_color_512.png')
 # imagen=imageio.imread('../standard_test_images/mandril_gray.png')
 # imagen=imageio.imread('../standard_test_images/crosses.png')
 # imagen=imageio.imread('../standard_test_images/circles.png')
@@ -56,7 +57,11 @@ imagen=imageio.imread('../standard_test_images/jetplane.png')
 # imagen=imageio.imread('../standard_test_images/walkbridge.png')
 # imagen = misc.ascent()
 
-(n,m)=imagen.shape # filas y columnas de la imagen
+n, m, d = 0,0,0
+try:
+    (n,m)=imagen.shape # filas y columnas de la imagen
+except:
+    (n,m,d)=imagen.shape # filas y columnas de la imagen
 n_bloque=8
 
 
@@ -67,9 +72,53 @@ n_bloque=8
 Definir una funcion que dada una imagen
 la cuantize vectorialmente usando K-means
 """
+def get_bloque(mat,inix,iniy,nbloque):
+    array=np.zeros((nbloque,nbloque))
+    i=inix
+    #print(inix)
+    #print(iniy)
+    j=iniy
+    ii=0;
+    jj=0;
+    while(i<inix+nbloque):
+        while(j<iniy+nbloque):
+            m=mat[i][j]
+            #print("M",m)
+            array[ii][jj]=m
+            j+=1
+            jj+=1
+            
+        j=iniy
+        jj=0;
+        ii+=1
+        i+=1
+        
+    return array
 
 def Cuantizacion_vectorial_KMeans(imagen, entradas_diccionario=2**8, n_bloque=8):
+    imagenCodigo = []
+    n, m, d = 0, 0, 0
+
+    try:
+        (n,m)=imagen.shape # filas y columnas de la imagen
+        print("It's a black & white image")
+    except:
+        (n,m,d)=imagen.shape # filas y columnas de la imagen
+        print("Owww man! That's colorfull!")
+
+    components = [n, m, n_bloque]
+    imagenCodigo.append(components)
+
+    normalized = imagen.astype('float64')
+
+    centers,distortion = kmeans(normalized,entradas_diccionario)
+    dictionary = np.array(centers) 
+    imagenCodigo.append(dictionary)
     
+    code,dist = vq(normalized, centers)
+    indexes = np.array(code)
+    imagenCodigo.append(indexes)
+
     return imagenCodigo
 
 
@@ -135,8 +184,11 @@ cuantize uniformemente los valores en cada bloque
 """
 
 def Dibuja_imagen_cuantizada_KMeans(imagenCodigo):
+    n, m, b = imagenCodigo[0]
+    dictionary = imagenCodigo[1]
+    indexes = imagenCodigo[2]
     
-    return 
+    return np.array(dictionary[indexes])
 
  #%%   
 """
@@ -165,9 +217,8 @@ Algunas sugerencias que os pueden ser útiles
 # por último múltiplico todos los píxeles de la imagen por q
 
 bits=3
-q=2**(bits) 
+q=2**(bits)
 imagen2=((np.floor(imagen/q)+1/2).astype(np.uint8))*q
-
 # dibujo la imagen cuanzizada resultante
 
 fig=plt.figure()
@@ -177,7 +228,7 @@ plt.yticks([])
 plt.imshow(imagen2, cmap=plt.cm.gray,vmin=0, vmax=255) 
 plt.show()
 
-
+imagenCodigo = Cuantizacion_vectorial_KMeans(imagen, q, 8)
 # Lectura y escritura de objetos
 
 import pickle
@@ -187,9 +238,10 @@ fichero='QScalar'
 with  open(fichero+'_dump.pickle', 'wb') as file:
     pickle.dump(imagenCodigo, file)
 
-
-with open(fichero, 'rb') as file:
+imagenRecuperada = []
+with open(fichero+'_dump.pickle', 'rb') as file:
     imagenLeidaCodificada=pickle.load(file)
+    imagenRecuperada = Dibuja_imagen_cuantizada_KMeans(imagenLeidaCodificada)
 
 
 # Convertir un array en imagen, mostrarla y guardarla en formato png.
@@ -200,6 +252,9 @@ with open(fichero, 'rb') as file:
 import PIL
 
 imagenPIL=PIL.Image.fromarray(imagenRecuperada)
+if imagenPIL.mode != 'RGB':
+    imagenPIL = imagenPIL.convert('RGB')
+
 imagenPIL.show()
 imagenPIL.save(fichero +'_imagen.png', 'PNG')
 
