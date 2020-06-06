@@ -48,8 +48,8 @@ Podéis usar las funciones implementadas, en particular vq y kmeans
 """
 #%%
 
-imagen=imageio.imread('../standard_test_images/jetplane.png')
-# imagen=imageio.imread('../standard_test_images/lena_color_512.png')
+# imagen=imageio.imread('../standard_test_images/jetplane.png')
+imagen=imageio.imread('../standard_test_images/lena_color_512.png')
 # imagen=imageio.imread('../standard_test_images/mandril_gray.png')
 # imagen=imageio.imread('../standard_test_images/crosses.png')
 # imagen=imageio.imread('../standard_test_images/circles.png')
@@ -72,53 +72,45 @@ n_bloque=8
 Definir una funcion que dada una imagen
 la cuantize vectorialmente usando K-means
 """
-def get_bloque(mat,inix,iniy,nbloque):
-    array=np.zeros((nbloque,nbloque))
-    i=inix
-    #print(inix)
-    #print(iniy)
-    j=iniy
-    ii=0;
-    jj=0;
-    while(i<inix+nbloque):
-        while(j<iniy+nbloque):
-            m=mat[i][j]
-            #print("M",m)
-            array[ii][jj]=m
-            j+=1
-            jj+=1
-            
-        j=iniy
-        jj=0;
-        ii+=1
-        i+=1
-        
-    return array
 
 def Cuantizacion_vectorial_KMeans(imagen, entradas_diccionario=2**8, n_bloque=8):
     imagenCodigo = []
-    n, m, d = 0, 0, 0
+    n, m, d, z = 0, 0, 1, 0
 
     try:
         (n,m)=imagen.shape # filas y columnas de la imagen
         print("It's a black & white image")
     except:
-        (n,m,d)=imagen.shape # filas y columnas de la imagen
-        print("Owww man! That's colorfull!")
+        try:
+            (n,m,d)=imagen.shape # filas y columnas de la imagen
+            print("Owww man! That's colorfull!")
+        except:
+            (n,m,d, z)=imagen.shape # filas y columnas de la imagen
+            print("Too much dimensions man. Rilaaaax!")
 
     components = [n, m, n_bloque]
     imagenCodigo.append(components)
-
     normalized = imagen.astype('float64')
 
-    centers,distortion = kmeans(normalized,entradas_diccionario)
-    dictionary = np.array(centers) 
-    imagenCodigo.append(dictionary)
-    
-    code,dist = vq(normalized, centers)
-    indexes = np.array(code)
-    imagenCodigo.append(indexes)
+    dictionary = [[] for d in range(d)]
+    indexes = [[] for d in range(d)]
+    img_slice = normalized
+    for dim in range(d):
+        if d > 1:
+            img_slice = normalized[:,:,dim]
+            
+        # for i in range(0,n,n_bloque):
+        #     for j in range(0,m,n_bloque):
+        #         bloque = img_slice[i:i+n_bloque,j:j+n_bloque]
 
+        centers,distortion = kmeans(img_slice,entradas_diccionario)
+        dictionary[dim] = np.array(centers).astype(np.uint8)
+        
+        code,dist = vq(img_slice, centers)
+        indexes[dim] = np.array(code)
+    
+    imagenCodigo.append(dictionary)
+    imagenCodigo.append(indexes)
     return imagenCodigo
 
 
@@ -187,8 +179,25 @@ def Dibuja_imagen_cuantizada_KMeans(imagenCodigo):
     n, m, b = imagenCodigo[0]
     dictionary = imagenCodigo[1]
     indexes = imagenCodigo[2]
+    d = len(dictionary)
     
-    return np.array(dictionary[indexes])
+    recompose = []
+    for dim in range(d):
+        if len(dictionary[dim]) == 0:
+            break
+        
+        color_slice = dictionary[dim]
+        index_slice = indexes[dim]
+        recompose.append(np.array(color_slice[index_slice]))
+    
+    if d == 1:
+        return np.array(recompose[0])
+    
+    # rgbArray = np.zeros((n,m,d), 'float64')
+    # for dim in range(d): 
+    #     rgbArray[..., dim] = np.array(recompose[dim])
+
+    return np.dstack((recompose[0],recompose[1],recompose[2]))
 
  #%%   
 """
@@ -216,7 +225,7 @@ Algunas sugerencias que os pueden ser útiles
 # a continuación convierto los valores de todos los píxeles en enteros de 8 bits sin signo
 # por último múltiplico todos los píxeles de la imagen por q
 
-bits=3
+bits=8
 q=2**(bits)
 imagen2=((np.floor(imagen/q)+1/2).astype(np.uint8))*q
 # dibujo la imagen cuanzizada resultante

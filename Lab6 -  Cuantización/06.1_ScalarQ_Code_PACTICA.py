@@ -28,16 +28,16 @@ import pickle
 #%%
 
 
-#imagen=imageio.imread('/home/albert/Escritorio/CDI/standard_test_images/jetplane.png')
-#imagen=imageio.imread('/home/albert/Escritorio/CDI/standard_test_images/mandril_gray.png')
+imagen=imageio.imread('../standard_test_images/jetplane.png')
+#imagen=imageio.imread('../standard_test_images/mandril_gray.png')
 # imagen=imageio.imread('../standard_test_images/crosses.png')
 # imagen=imageio.imread('../standard_test_images/circles.png')
 # imagen=imageio.imread('../standard_test_images/cameraman.png')
 # imagen=imageio.imread('../standard_test_images/walkbridge.png')
-imagen=imageio.imread('/home/albert/Escritorio/CDI/standard_test_images/mandril_color.png')
+# imagen=imageio.imread('../standard_test_images/mandril_color.png')
 
 print(imagen.shape)
-(n,m,rgb)=imagen.shape # filas y columnas de la imagen
+(n,m)=imagen.shape # filas y columnas de la imagen
 
 plt.figure()
 plt.xticks([])
@@ -82,7 +82,7 @@ def get_bloque(mat,inix,iniy,fix,fiy,nbloque):
     while(i<fix):
         while(j<fiy):
             m=mat[i][j]
-            print("M",m)
+            #print("M",m)
             array[ii][jj]=m
             j+=1
             jj+=1
@@ -180,10 +180,8 @@ def Cuantizacion_uniforme_adaptativa(imag, bits=3, n_bloque=8):
 mat=creamatriz2(32,32)
 #print(mat)
 #print("###############")
-imgen = [[129, 129, 103, 125, 42, 38, 38, 38], [142, 129, 93, 121, 43, 38, 39, 38], [143, 119, 98, 118, 44, 39, 39, 37], [140, 133, 96, 110, 41, 39, 41, 40], [144, 146, 117, 116, 41, 39, 41, 42], [130, 98, 107, 118, 41, 45, 54, 75], [98, 82, 83, 131, 55, 74, 80, 94], [75, 61, 71, 127, 76, 84, 88, 104]] 
-imagenCodigo=Cuantizacion_uniforme_adaptativa(imagen,2,8)
-print(imagenCodigo)
-exit()
+imagenCodigo=Cuantizacion_uniforme_adaptativa(imagen,3,8)
+
 
 #print(imagencodigo)
 
@@ -303,6 +301,8 @@ with open(fichero+'_dump.pickle', 'rb') as file:
 
 
 imagenPIL=PIL.Image.fromarray(imagenLeidaCodificada)
+if imagenPIL.mode != 'RGB':
+    imagenPIL = imagenPIL.convert('RGB')
 imagenPIL.show()
 imagenPIL.save(fichero +'_imagen.png', 'PNG')
 
