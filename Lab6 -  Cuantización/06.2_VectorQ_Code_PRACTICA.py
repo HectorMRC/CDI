@@ -79,14 +79,11 @@ def Cuantizacion_vectorial_KMeans(imagen, entradas_diccionario=2**8, n_bloque=8)
 
     try:
         (n,m)=imagen.shape # filas y columnas de la imagen
-        print("It's a black & white image")
     except:
         try:
             (n,m,d)=imagen.shape # filas y columnas de la imagen
-            print("Owww man! That's colorfull!")
         except:
             (n,m,d, z)=imagen.shape # filas y columnas de la imagen
-            print("Too much dimensions man. Rilaaaax!")
 
     components = [n, m, n_bloque]
     imagenCodigo.append(components)
@@ -225,7 +222,7 @@ Algunas sugerencias que os pueden ser útiles
 # a continuación convierto los valores de todos los píxeles en enteros de 8 bits sin signo
 # por último múltiplico todos los píxeles de la imagen por q
 
-bits=8
+bits=3
 q=2**(bits)
 imagen2=((np.floor(imagen/q)+1/2).astype(np.uint8))*q
 # dibujo la imagen cuanzizada resultante
