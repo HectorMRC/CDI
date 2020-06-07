@@ -291,11 +291,11 @@ Imagen COLOR
 #--------------------------------------------------------------------------
 """
 
-# mandril_gray=imageio.imread('../standard_test_images/pirate.png').astype(np.int32)
-# mandril_jpeg=jpeg_gris(mandril_gray)
+# gray=imageio.imread('../standard_test_images/jetplane.png').astype(np.int32)
+# jpeg=jpeg_gris(gray)
 
-mandril_color=imageio.imread('../standard_test_images/lena_color.png').astype(np.int32)
-# peppers_color=imageio.imread('/home/albert/Escritorio/CDI/standard_test_images/peppers_color.png').astype(np.int32)
+mandril_color=imageio.imread('../standard_test_images/lena_color_512.png').astype(np.int32)
+#peppers_color=imageio.imread('/home/albert/Escritorio/CDI/standard_test_images/peppers_color.png').astype(np.int32)
 #
 #start= time.clock()
 mandril_jpeg=jpeg_color(mandril_color)     
