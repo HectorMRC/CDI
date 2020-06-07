@@ -28,9 +28,9 @@ import pickle
 #%%
 
 
-imagen=imageio.imread('../standard_test_images/jetplane.png')
+# imagen=imageio.imread('../standard_test_images/jetplane.png')
 # imagen=imageio.imread('../standard_test_images/lena_color_512.png')
-# imagen=imageio.imread('../standard_test_images/peppers_color.png')
+imagen=imageio.imread('../standard_test_images/peppers_color.png')
 # imagen=imageio.imread('../standard_test_images/mandril_gray.png')
 # imagen=imageio.imread('../standard_test_images/crosses.png')
 # imagen=imageio.imread('../standard_test_images/circles.png')
