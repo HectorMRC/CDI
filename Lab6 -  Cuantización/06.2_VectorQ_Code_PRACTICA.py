@@ -258,8 +258,8 @@ with open(fichero+'_dump.pickle', 'rb') as file:
 import PIL
 
 imagenPIL=PIL.Image.fromarray(imagenRecuperada)
-if imagenPIL.mode != 'RGB':
-    imagenPIL = imagenPIL.convert('RGB')
+# if imagenPIL.mode != 'RGB':
+#     imagenPIL = imagenPIL.convert('RGB')
 
 imagenPIL.show()
 imagenPIL.save(fichero +'_imagen.png', 'PNG')

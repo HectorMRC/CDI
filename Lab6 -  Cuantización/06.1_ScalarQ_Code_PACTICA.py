@@ -28,9 +28,9 @@ import pickle
 #%%
 
 
-# imagen=imageio.imread('../standard_test_images/jetplane.png')
+imagen=imageio.imread('../standard_test_images/jetplane.png')
 # imagen=imageio.imread('../standard_test_images/lena_color_512.png')
-imagen=imageio.imread('../standard_test_images/peppers_color.png')
+# imagen=imageio.imread('../standard_test_images/peppers_color.png')
 # imagen=imageio.imread('../standard_test_images/mandril_gray.png')
 # imagen=imageio.imread('../standard_test_images/crosses.png')
 # imagen=imageio.imread('../standard_test_images/circles.png')
@@ -312,8 +312,9 @@ with open(fichero+'_dump.pickle', 'rb') as file:
 
 
 imagenPIL=PIL.Image.fromarray(imagenLeidaCodificada)
-if imagenPIL.mode != 'RGB':
-    imagenPIL = imagenPIL.convert('RGB')
+# if imagenPIL.mode != 'RGB':
+#     imagenPIL = imagenPIL.convert('RGB')
+
 imagenPIL.show()
 imagenPIL.save(fichero +'_imagen.png', 'PNG')
 
