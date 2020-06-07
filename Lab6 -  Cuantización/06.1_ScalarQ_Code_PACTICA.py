@@ -29,15 +29,16 @@ import pickle
 
 
 imagen=imageio.imread('../standard_test_images/jetplane.png')
-#imagen=imageio.imread('../standard_test_images/mandril_gray.png')
+# imagen=imageio.imread('../standard_test_images/lena_color_512.png')
+# imagen=imageio.imread('../standard_test_images/peppers_color.png')
+# imagen=imageio.imread('../standard_test_images/mandril_gray.png')
 # imagen=imageio.imread('../standard_test_images/crosses.png')
 # imagen=imageio.imread('../standard_test_images/circles.png')
 # imagen=imageio.imread('../standard_test_images/cameraman.png')
 # imagen=imageio.imread('../standard_test_images/walkbridge.png')
 # imagen=imageio.imread('../standard_test_images/mandril_color.png')
 
-print(imagen.shape)
-(n,m)=imagen.shape # filas y columnas de la imagen
+# (n,m)=imagen.shape # filas y columnas de la imagen
 
 plt.figure()
 plt.xticks([])
@@ -140,20 +141,29 @@ def cuantiza(b,inter):
    
 def Cuantizacion_uniforme_adaptativa(imag, bits=3, n_bloque=8):
     imagencodigo=[[]]
+    n, m, d, z = 0, 0, 1, 0
+
+    try:
+        (n,m)=imagen.shape # filas y columnas de la imagen
+    except:
+        try:
+            (n,m,d)=imagen.shape # filas y columnas de la imagen
+        except:
+            (n,m,d, z)=imagen.shape # filas y columnas de la imagen
+
     imagencodigo[0].append(n)
     imagencodigo[0].append(m)
     imagencodigo[0].append(n_bloque)
     imagencodigo[0].append(bits)
-    j=0
-    i=0
-    while(i<n):
-        while(j<m):
-            if(i>n-n_bloque and j>m-n_bloque):
-                break
-            else:
-                bloque=get_bloque(imag,i,j,i+(n_bloque),j+(n_bloque),n_bloque)
-                if(i==0 and j==8):
-                     print("Bloque 1:",bloque)
+
+    for dim in range(d):
+        img_slice = imag
+        if d > 1:
+            img_slice = imag[:,:,dim]
+
+        for i in range(0,n,n_bloque):
+            for j in range(0,m,n_bloque):
+                bloque = img_slice[i:i+n_bloque,j:j+n_bloque]
                 (minimo,maximo)=calcula_minimo_maximo(bloque)
                 intervals=calcula_intervals(minimo,maximo+1,2**bits)
                 mat_cuantizada=cuantiza(bloque,intervals)
@@ -163,24 +173,14 @@ def Cuantizacion_uniforme_adaptativa(imag, bits=3, n_bloque=8):
                 ll=[]
                 ll.append(l)
                 ll.append(mat_cuantizada)
-                imagencodigo.append(ll)           
-                if(i==0 and j==8):
-                    #print del primer bloque para ver que funciona la cuantizacion
-                    print("Minimo del bloque:",minimo)
-                    print("Maximo del bloque:",maximo) 
-                    print("Intervalos:",intervals)      
-                    print("Bloque cuantizado:",mat_cuantizada)
-            j+=n_bloque
-        j=0   
-        i+=n_bloque       
+                imagencodigo.append(ll)
 
     return imagencodigo
-
 
 mat=creamatriz2(32,32)
 #print(mat)
 #print("###############")
-imagenCodigo=Cuantizacion_uniforme_adaptativa(imagen,3,8)
+imagenCodigo=Cuantizacion_uniforme_adaptativa(imagen, 3, 8)
 
 
 #print(imagencodigo)
@@ -258,36 +258,47 @@ def Dibuja_imagen_cuantizada(imagencodigo):
     m=datosini[1]
     nbloque=datosini[2]
     bits=datosini[3]
-    i=1
-    imagendecod=np.zeros((n,m))
-    nini=0
-    mini=0
-    nfi=nini+nbloque
-    mfi=mini+nbloque
-    while(i<len(imagencodigo)):
-        infobloque=imagencodigo[i]
-        minim=infobloque[0][0]
-        maxim=infobloque[0][1]
-        bloque=infobloque[1]
-        intervals=calcula_intervals(minim,maxim+1,2**bits)
-        bdescuantizado=descuantiza(intervals,bloque,nbloque)
-        imagendecod[nini:nfi,mini:mfi]=bdescuantizado
-        mini+=nbloque
-        mfi+=nbloque
-        if(mfi>m):
-            mini=0
-            mfi=mini+nbloque
-            nini=nini+nbloque
-            nfi=nini+nbloque
-        if(nini>n-nbloque and mini > m-nbloque):
-            break
-        i+=1
-        
-    return imagendecod
+
+    blks_x_capa = int((n*m)/(nbloque**2))
+    bloques_codif = imagenCodigo[1:]
+    d = int(len(bloques_codif)/(blks_x_capa))
+
+    imagendecod=[np.zeros((n,m)) for dim in range(d)]
+    for dim in range(d):
+        index = dim*blks_x_capa
+        bloques = bloques_codif[index:index+blks_x_capa]
+
+        i = 0
+        nini = 0
+        mini = 0
+        nfi=nini+nbloque
+        mfi=mini+nbloque
+        while(i<blks_x_capa):
+            infobloque=bloques[i]
+            minim=infobloque[0][0]
+            maxim=infobloque[0][1]
+            bloque=infobloque[1]
+            intervals=calcula_intervals(minim,maxim+1,2**bits)
+            bdescuantizado=descuantiza(intervals,bloque,nbloque)
+            imagendecod[dim][nini:nfi,mini:mfi]=bdescuantizado
+            mini+=nbloque
+            mfi+=nbloque
+            if(mfi>m):
+                mini=0
+                mfi=mini+nbloque
+                nini=nini+nbloque
+                nfi=nini+nbloque
+            if(nini>n-nbloque and mini > m-nbloque):
+                break
+            i+=1
+    
+    if d == 1:
+        return imagendecod[0]
+
+    return np.dstack((imagendecod[0],imagendecod[1],imagendecod[2])).astype(np.uint8)
 
 
 imagendecoded=Dibuja_imagen_cuantizada(imagenCodigo)
-print(imagendecoded)
 
 
 fichero='QScalar'
